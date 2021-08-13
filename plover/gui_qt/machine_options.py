@@ -26,7 +26,7 @@ class SerialOption(QWidget, Ui_SerialWidget):
         self.on_scan()
         port = value['port']
         if port is not None and port != 'None':
-            port_index = self.port.findText(port)
+            port_index = self.port.findData(port)
             if port_index != -1:
                 self.port.setCurrentIndex(port_index)
             else:
@@ -61,10 +61,16 @@ class SerialOption(QWidget, Ui_SerialWidget):
 
     def on_scan(self):
         self.port.clear()
-        self.port.addItems(sorted(x[0] for x in comports()))
+        for port in comports():
+            name, description = port[0], port[1]
+            if description is not None and description != "n/a":
+                description = "{0} ({1})".format(description, name)
+            else:
+                description = name
+            self.port.addItem(description, userData=name)
 
     def on_port_changed(self, value):
-        self._update('port', value)
+        self._update('port', self.port.currentData())
 
     def on_baudrate_changed(self, value):
         self._update('baudrate', int(value))
